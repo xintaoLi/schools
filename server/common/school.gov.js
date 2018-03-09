@@ -1,3 +1,3 @@
 module.exports = {
-  ShenZhen: 'http://www.sz.gov.cn/school/ssxx/'
+  ShenZhen: 'http://www.sz.gov.cn/school/'
 }
