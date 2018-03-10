@@ -28,7 +28,7 @@ const Request = {
     return metas[0] || 'gbk';
   },
 
-  saveJsonToFile: (data, fileName = '', group = '') => {
+  saveJsonToFile: (data, fileName = '', group = '', extendObj) => {
     fileName = fileName || new Date().getTime();
     let filePath = path.resolve(__dirname, '../data');
 
@@ -44,6 +44,7 @@ const Request = {
     fs.writeFile(filePath, JSON.stringify({
       status: 0,
       count: data.length,
+      ext: extendObj,
       data: data
     }), function (err) {
       if (err) throw err;

@@ -11,8 +11,10 @@ class ShenZhenPriSchool extends SchoolBase {
     });
     this.ListNavis = [];
     this.DefaultPrefix = 'ssxx';
+    this.GroupDefine = new Map();
   }
 
+  /* Analyze Section And School Group */
   loadIndexPage () {
     return Promise.resolve(Request.httpGet(this.SiteUrl + this.DefaultPrefix, this.CharSet).then(res => {
       let $ = cheerio.load(res.text);
@@ -34,8 +36,10 @@ class ShenZhenPriSchool extends SchoolBase {
           HasChild: _ChildNodes && _ChildNodes.length > 0,
           ChildNodes: _ChildNodes && _ChildNodes.toArray().map((item, index) => {
             let _node = $(item).find('a');
+            let _group = _node.text();
+            let _uid = this.GroupDefine.has(_group) && this.GroupDefine.get(_group) || this.GroupDefine.set(_group, `${new Date().getTime()}${i}`).get(_group);
             return {
-              Uid: index + 1,
+              Uid: _uid,
               Group: _node.text(),
               SiteUrl: _node.attr('href')
             };
@@ -44,7 +48,7 @@ class ShenZhenPriSchool extends SchoolBase {
       });
 
       /*保存首页数据*/
-      Request.saveJsonToFile(this.ListNavis, 'index.json', this.Group);
+      Request.saveJsonToFile(this.ListNavis, 'index.json', this.Group, [...this.GroupDefine]);
     }).catch(err => {
       console.error(err);
     }));
