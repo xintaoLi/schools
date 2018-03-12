@@ -7,10 +7,8 @@ export default class App extends Component {
     super(...arguments);
   }
   render () {
-    return (
-      <View>
-        <SchoolIndex />
-      </View>
+    return (      
+        <SchoolIndex />      
     );
   }
 }

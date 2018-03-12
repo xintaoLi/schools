@@ -4,6 +4,7 @@ import {
   StyleSheet,
   Text,
   View,
+  FlatList,
   SectionList
 } from 'react-native';
 
@@ -31,6 +32,7 @@ const styles = StyleSheet.create({
 class SchoolIndex extends Component {
   constructor () {
     super(...arguments);
+    this.state = { SectionShools: [] };
     this.DataRoot = '../data/';
     this.RootConf = require('../data/index.json');
     this.City = "ShenZhen";
@@ -41,41 +43,65 @@ class SchoolIndex extends Component {
   }
 
   getSectionInfo () {
-    // let sectionPath = this.this.DataRoot + this.RootConf[this.City] + '/index.json';
-    // let schoolPath = this.this.DataRoot + this.RootConf[this.City] + '/School-Pri-Infos.json';
     this.SectionInfos = require('../data/ShenZhen-Gov/index.json');
     this.SchoolInfos = require('../data/ShenZhen-Gov/School-Pri-Infos.json');
     this.SectionMap = new Map(this.SectionInfos.ext);
   }
 
   getSectionsSchools () {
-    return this.SectionInfos.data.map(item => {
-      let _data = item.HasChild && item.ChildNodes || this.SchoolInfos.data.filter(el => el.SId === item.Uid).map(e => e.Infos);
+    let data = this.SectionInfos.data.map((item, index) => {
+      let _data = [];
+      if (item.HasChild) {
+        let _SectionSchools = this.SchoolInfos.data.filter(el => el.SId === item.Uid)[0];
+        _data = item.ChildNodes.map(_item => {
+          return {
+            title: _item.Group,
+            sType: 'G',
+            data: _SectionSchools.Infos.filter(__item => __item.GId === _item.Uid)[0].Info
+          }
+        });
+      }
+      else {
+        _data = [{
+          title: item.Section,
+          sType: 'S',
+          data: this.SchoolInfos.data.filter(el => el.SId === item.Uid)[0].Infos
+        }]
+      }
       return { title: item.Section, hasChild: item.HasChild, data: _data };
-    })
+    });
+    return data;
   }
 
-  renderChildNodes (item) {
-    if (item.hasChild) {
-      return
-      return <Text style={styles.item}>{item.Group}</Text>
-    } else {
-      return <Text style={styles.item}>{item.Name}</Text>
-    }
+  renderSubNodes (node) {
+    return (
+      // <Text style={styles.sectionHeader}>{typeof(node)}</Text>
+      <SectionList
+        sections={[node]}
+        renderItem={({ item }) => <Text style={styles.item}>{item.Name}</Text>}
+        renderSectionHeader={({ section }) => <Text style={styles.sectionHeader}>{section.title}</Text>}
+        keyExtractor={(item, index) => index.toString()}
+      />
+    );
+  }
+
+  renderSections () {
+    return (<SectionList
+      sections={this.getSectionsSchools()}
+      renderItem={({ item }) => this.renderSubNodes(item)}
+      renderSectionHeader={({ section }) => <Text style={styles.sectionHeader}>{section.title}</Text>}
+      keyExtractor={(item, index) => index.toString()}
+    />);
   }
 
   render () {
     return <View style={styles.container}>
-      <View>
-        <SectionList
-          sections={() => { this.getSectionsSchools() }}
-          renderItem={({ item }) => this.renderChildNodes(item)}
-          renderSectionHeader={({ section }) => <Text style={styles.sectionHeader}>{section.title}</Text>}
-        />
-      </View>
+      {this.renderSections()}
     </View>
   }
 }
 
-export {SchoolIndex};
+export { SchoolIndex };
+
+
 
